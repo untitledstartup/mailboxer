@@ -80,13 +80,18 @@ class Receipt < ActiveRecord::Base
         ids << rcp.id
       end
       unless ids.empty?
-        conditions = [""].concat(ids)
-        condition = "id = ? "
-        ids.drop(1).each do
-          condition << "OR id = ? "
-        end
-        conditions[0] = condition
-        Receipt.except(:where).except(:joins).where(conditions).update_all(updates)
+        # HACK!!!!
+        sql = ids.map { "#{table_name}.id = ? " }.join(' OR ')
+        conditions = [sql].concat(ids)
+        Receipt.where(conditions).update_all(updates)
+
+        # conditions = [""].concat(ids)
+        # condition = "id = ? "
+        # ids.drop(1).each do
+        #   condition << "OR id = ? "
+        # end
+        # conditions[0] = condition
+        # Receipt.except(:where).except(:joins).where(conditions).update_all(updates)
       end
     end
   end
